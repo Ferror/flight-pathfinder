@@ -12,8 +12,13 @@ export function newId(): string {
   return crypto.randomUUID();
 }
 
-export function newLeg(from = "", to = "", kgDeg = 0): LegInput {
-  return { id: newId(), from, to, kgDeg };
+export function newLeg(
+  from = "",
+  to = "",
+  kgDeg = 0,
+  distanceNm = 20,
+): LegInput {
+  return { id: newId(), from, to, kgDeg, distanceNm };
 }
 
 export function newAirport(
@@ -26,9 +31,9 @@ export function newAirport(
 
 export function exampleLegs(): LegInput[] {
   return [
-    newLeg("EPGL", "PAPA", 350),
-    newLeg("PAPA", "WHISKEY", 100),
-    newLeg("WHISKEY", "INDIA", 50),
+    newLeg("EPGL", "PAPA", 350, 20),
+    newLeg("PAPA", "WHISKEY", 100, 25),
+    newLeg("WHISKEY", "INDIA", 50, 15),
   ];
 }
 

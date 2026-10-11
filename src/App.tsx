@@ -3,6 +3,7 @@ import { AirportNotes } from "./components/AirportNotes";
 import { FlightConditions } from "./components/FlightConditions";
 import { LegsTable } from "./components/LegsTable";
 import { Report } from "./components/Report";
+import { RouteMap } from "./components/RouteMap";
 import {
   defaultFlight,
   exampleAirports,
@@ -11,7 +12,7 @@ import {
   newLeg,
 } from "./model/defaults";
 import type { AirportNote, FlightInputs, LegInput } from "./model/types";
-import { chainLegs } from "./model/route";
+import { chainLegs, normalizeLeg } from "./model/route";
 import { calculateCourse } from "./nav/calculateCourse";
 import { applyTheme, loadState, saveState, type Theme } from "./storage/local";
 
@@ -29,7 +30,7 @@ function initialState() {
 export function App() {
   const [flight, setFlight] = useState<FlightInputs>(() => initialState().flight);
   const [legs, setLegs] = useState<LegInput[]>(() =>
-    chainLegs(initialState().legs),
+    chainLegs(initialState().legs.map(normalizeLeg)),
   );
   const [airports, setAirports] = useState<AirportNote[]>(
     () => initialState().airports,
@@ -73,7 +74,7 @@ export function App() {
           <p className="eyebrow">Navigation</p>
           <h1>Flight Pathfinder</h1>
           <p className="lede">
-            KG → KDM, KZ, KM from TAS, wind, and magnetic variation.
+            KG, KM, and time from TAS, wind, variation, and distance.
           </p>
         </div>
         <div className="actions">
@@ -114,6 +115,7 @@ export function App() {
         </button>
       </div>
       <Report flight={flight} rows={rows} airports={airports} />
+      <RouteMap flight={flight} rows={rows} />
     </div>
   );
 }

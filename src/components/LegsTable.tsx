@@ -1,6 +1,7 @@
 import { chainLegs } from "../model/route";
 import type { CourseResult, FlightInputs, LegInput } from "../model/types";
 import { calculateCourse, formatSignedDeg, roundDeg } from "../nav/calculateCourse";
+import { formatHours, legTimeHours } from "../nav/time";
 
 type Props = {
   legs: LegInput[];
@@ -19,6 +20,9 @@ export function LegsTable({ legs, flight, onChange }: Props) {
     onChange(chainLegs(legs.filter((leg) => leg.id !== id)));
   }
 
+  const totalNm = legs.reduce((sum, leg) => sum + (leg.distanceNm || 0), 0);
+  const totalHours = legTimeHours(totalNm, flight.tasKt);
+
   return (
     <section className="card">
       <div className="card-head">
@@ -31,6 +35,8 @@ export function LegsTable({ legs, flight, onChange }: Props) {
               <th>From</th>
               <th>To</th>
               <th>KG</th>
+              <th>NM</th>
+              <th>Time</th>
               <th>KDM</th>
               <th>KZ</th>
               <th>KM</th>
@@ -41,6 +47,7 @@ export function LegsTable({ legs, flight, onChange }: Props) {
             {legs.map((leg, index) => {
               const result = calculateCourse(leg.kgDeg, flight);
               const fromLocked = index > 0;
+              const time = legTimeHours(leg.distanceNm, flight.tasKt);
               return (
                 <tr key={leg.id}>
                   <td>
@@ -71,6 +78,18 @@ export function LegsTable({ legs, flight, onChange }: Props) {
                       }
                     />
                   </td>
+                  <td>
+                    <input
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={leg.distanceNm}
+                      onChange={(e) =>
+                        update(leg.id, { distanceNm: Number(e.target.value) })
+                      }
+                    />
+                  </td>
+                  <td className="num">{formatHours(time)}</td>
                   <ResultCells result={result} />
                   <td>
                     <button
@@ -85,6 +104,14 @@ export function LegsTable({ legs, flight, onChange }: Props) {
               );
             })}
           </tbody>
+          <tfoot>
+            <tr>
+              <td colSpan={3}>Total</td>
+              <td className="num">{totalNm} NM</td>
+              <td className="num">{formatHours(totalHours)}</td>
+              <td colSpan={4} />
+            </tr>
+          </tfoot>
         </table>
       </div>
     </section>

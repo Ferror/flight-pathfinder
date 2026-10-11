@@ -1,5 +1,6 @@
 import type { AirportNote, CourseResult, FlightInputs, LegInput } from "../model/types";
-import { formatSignedDeg, roundDeg } from "../nav/calculateCourse";
+import { roundDeg } from "../nav/calculateCourse";
+import { formatHours, legTimeHours } from "../nav/time";
 
 type Row = {
   leg: LegInput;
@@ -13,6 +14,10 @@ type Props = {
 };
 
 export function Report({ flight, rows, airports }: Props) {
+  const totalNm = rows.reduce((sum, { leg }) => sum + (leg.distanceNm || 0), 0);
+  const totalHours = legTimeHours(totalNm, flight.tasKt);
+  const shownAirports = airports.filter((a) => a.icao || a.radio || a.runways);
+
   return (
     <section className="card report" id="report">
       <div className="card-head">
@@ -33,9 +38,9 @@ export function Report({ flight, rows, airports }: Props) {
             <th>From</th>
             <th>To</th>
             <th>KG</th>
-            <th>KDM</th>
-            <th>KZ</th>
             <th>KM</th>
+            <th>NM</th>
+            <th>Time</th>
           </tr>
         </thead>
         <tbody>
@@ -45,37 +50,55 @@ export function Report({ flight, rows, airports }: Props) {
               <td>{leg.to || "—"}</td>
               <td className="num">{roundDeg(leg.kgDeg)}°</td>
               {result.ok ? (
-                <>
-                  <td className="num">{roundDeg(result.value.kdmDeg)}°</td>
-                  <td className="num">{formatSignedDeg(result.value.kzDeg)}°</td>
-                  <td className="num">{roundDeg(result.value.kmDeg)}°</td>
-                </>
+                <td className="num">{roundDeg(result.value.kmDeg)}°</td>
               ) : (
-                <td colSpan={3} className="error">
+                <td className="error">
                   {result.error === "wind_gte_tas" ? "Wind ≥ TAS" : "Invalid speed"}
                 </td>
               )}
+              <td className="num">{leg.distanceNm || 0}</td>
+              <td className="num">
+                {formatHours(legTimeHours(leg.distanceNm, flight.tasKt))}
+              </td>
             </tr>
           ))}
         </tbody>
+        <tfoot>
+          <tr>
+            <td colSpan={4}>Total</td>
+            <td className="num">{totalNm} NM</td>
+            <td className="num">{formatHours(totalHours)}</td>
+          </tr>
+        </tfoot>
       </table>
 
-      {airports.some((a) => a.icao || a.radio || a.runways) && (
+      {shownAirports.length > 0 && (
         <>
           <h3>Airports</h3>
-          <ul className="airport-list">
-            {airports.map((a) => (
-              <li key={a.id}>
-                {[a.icao, a.radio, a.runways].filter(Boolean).join(", ")}
-              </li>
-            ))}
-          </ul>
+          <table>
+            <thead>
+              <tr>
+                <th>Airport</th>
+                <th>Radio</th>
+                <th>Runways</th>
+              </tr>
+            </thead>
+            <tbody>
+              {shownAirports.map((a) => (
+                <tr key={a.id}>
+                  <td>{a.icao || "—"}</td>
+                  <td>{a.radio || "—"}</td>
+                  <td>{a.runways || "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </>
       )}
 
       <p className="disclaimer">
-        Drift-angle model from the velocity triangle. Verify results against your
-        navigation syllabus. Round only for display.
+        Time is distance ÷ TAS. Heading uses the drift-angle model. Verify results
+        against your navigation syllabus.
       </p>
     </section>
   );

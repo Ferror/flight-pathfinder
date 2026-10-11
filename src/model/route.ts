@@ -6,3 +6,11 @@ export function chainLegs(legs: LegInput[]): LegInput[] {
     index === 0 ? leg : { ...leg, from: legs[index - 1].to },
   );
 }
+
+export function normalizeLeg(leg: LegInput): LegInput {
+  const distanceNm = Number(leg.distanceNm);
+  return {
+    ...leg,
+    distanceNm: Number.isFinite(distanceNm) && distanceNm >= 0 ? distanceNm : 0,
+  };
+}

@@ -13,6 +13,7 @@ export type LegInput = {
   from: string;
   to: string;
   kgDeg: number;
+  distanceNm: number;
 };
 
 export type AirportNote = {

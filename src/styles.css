@@ -47,7 +47,7 @@ body {
 }
 
 .page {
-  max-width: 920px;
+  max-width: 1040px;
   margin: 0 auto;
   padding: 2.5rem 1.25rem 4rem;
 }
@@ -134,6 +134,10 @@ label {
 
 input[type="number"],
 input[type="text"],
+table input[type="number"] {
+  min-width: 4.25rem;
+}
+
 table input {
   font: inherit;
   font-variant-numeric: tabular-nums;
@@ -261,9 +265,10 @@ button.link.danger:hover {
   color: var(--muted);
 }
 
-.airport-list {
-  margin: 0;
-  padding-left: 1.1rem;
+tfoot td {
+  border-top: 1px solid var(--line);
+  padding-top: 0.65rem;
+  font-weight: 600;
 }
 
 .disclaimer {
@@ -274,6 +279,127 @@ button.link.danger:hover {
 
 .add-row {
   margin: -0.4rem 0 1rem;
+}
+
+.map-frame {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.map-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.map-bg {
+  fill: var(--input);
+}
+
+.map-track {
+  stroke: var(--accent);
+  stroke-width: 2.4;
+  fill: none;
+}
+
+.map-track-fill {
+  fill: var(--accent);
+}
+
+.map-heading {
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 3.5;
+  fill: none;
+}
+
+.map-heading-fill {
+  fill: var(--muted);
+}
+
+.map-wind {
+  stroke: var(--danger);
+  stroke-width: 1.6;
+  fill: none;
+}
+
+.map-wind-fill {
+  fill: var(--danger);
+}
+
+.map-fix {
+  fill: var(--paper);
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.map-label {
+  fill: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.map-leg-text,
+.map-meta {
+  fill: var(--muted);
+  font-size: 10px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.map-meta {
+  font-size: 11px;
+}
+
+.map-scale {
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+.map-compass circle {
+  fill: var(--paper);
+  stroke: var(--line);
+}
+
+.map-compass polygon {
+  fill: var(--danger);
+}
+
+.map-compass text {
+  fill: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem 1.25rem;
+  align-items: center;
+  margin: 0.75rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.swatch {
+  display: inline-block;
+  width: 1.4rem;
+  height: 0;
+  border-top: 2.5px solid var(--accent);
+  margin-right: 0.4rem;
+  vertical-align: middle;
+}
+
+.swatch.heading {
+  border-top-style: dashed;
+  border-top-color: var(--muted);
+}
+
+.swatch.wind {
+  border-top-color: var(--danger);
 }
 
 @media print {
@@ -307,6 +433,15 @@ button.link.danger:hover {
   .card.report {
     border: none;
     padding: 0;
+  }
+
+  .card.report.map {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  .map-bg {
+    fill: #fff;
   }
 }
 
