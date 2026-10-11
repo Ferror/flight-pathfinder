@@ -5,6 +5,8 @@ import { FlightConditions } from "./components/FlightConditions";
 import { LegsTable } from "./components/LegsTable";
 import { Report } from "./components/Report";
 import { RouteMap } from "./components/RouteMap";
+import { Weather } from "./components/Weather";
+import type { SynopObservation } from "./weather/imgw";
 import {
   defaultAircraft,
   defaultFlight,
@@ -41,6 +43,7 @@ export function App() {
   const [aircraft, setAircraft] = useState<Aircraft>(
     () => initialState().aircraft ?? defaultAircraft,
   );
+  const [weather, setWeather] = useState<SynopObservation[]>([]);
   const [theme, setTheme] = useState<Theme>(
     () => {
       const next = initialState().theme ?? "light";
@@ -105,6 +108,16 @@ export function App() {
       </header>
 
       <FlightConditions value={flight} onChange={setFlight} />
+      <Weather
+        onObservations={setWeather}
+        onApplyWind={(wind) =>
+          setFlight({
+            ...flight,
+            windDirDeg: wind.dirDeg,
+            windSpeedKt: wind.speedKt,
+          })
+        }
+      />
       <AircraftDetails value={aircraft} onChange={setAircraft} />
       <LegsTable
         legs={legs}
@@ -127,6 +140,7 @@ export function App() {
         aircraft={aircraft}
         rows={rows}
         airports={airports}
+        weather={weather}
       />
       <RouteMap flight={flight} rows={rows} />
     </div>

@@ -280,6 +280,16 @@ tfoot td {
   color: var(--muted);
 }
 
+.disclaimer a,
+.summary a {
+  color: var(--accent);
+}
+
+button.link:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 .add-row {
   margin: -0.4rem 0 1rem;
 }
