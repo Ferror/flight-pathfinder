@@ -1,4 +1,4 @@
-import type { AirportNote, FlightInputs, LegInput } from "./types";
+import type { Aircraft, AirportNote, FlightInputs, LegInput } from "./types";
 
 export const defaultFlight: FlightInputs = {
   tasKt: 80,
@@ -6,6 +6,12 @@ export const defaultFlight: FlightInputs = {
   windSpeedKt: 20,
   dmDeg: 5,
   dmSense: "E",
+};
+
+export const defaultAircraft: Aircraft = {
+  typeName: "Cessna 150",
+  registration: "SP-UTK",
+  fuelLph: 22,
 };
 
 export function newId(): string {

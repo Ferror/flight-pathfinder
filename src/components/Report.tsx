@@ -1,6 +1,17 @@
-import type { AirportNote, CourseResult, FlightInputs, LegInput } from "../model/types";
+import type {
+  Aircraft,
+  AirportNote,
+  CourseResult,
+  FlightInputs,
+  LegInput,
+} from "../model/types";
 import { roundDeg } from "../nav/calculateCourse";
-import { formatHours, legTimeHours } from "../nav/time";
+import {
+  estimatedFuelL,
+  formatHours,
+  formatLiters,
+  legTimeHours,
+} from "../nav/time";
 
 type Row = {
   leg: LegInput;
@@ -9,14 +20,19 @@ type Row = {
 
 type Props = {
   flight: FlightInputs;
+  aircraft: Aircraft;
   rows: Row[];
   airports: AirportNote[];
 };
 
-export function Report({ flight, rows, airports }: Props) {
+export function Report({ flight, aircraft, rows, airports }: Props) {
   const totalNm = rows.reduce((sum, { leg }) => sum + (leg.distanceNm || 0), 0);
   const totalHours = legTimeHours(totalNm, flight.tasKt);
+  const totalFuel = estimatedFuelL(totalHours, aircraft.fuelLph);
   const shownAirports = airports.filter((a) => a.icao || a.radio || a.runways);
+  const plane = [aircraft.typeName, aircraft.registration]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <section className="card report" id="report">
@@ -28,6 +44,8 @@ export function Report({ flight, rows, airports }: Props) {
       </div>
 
       <p className="summary">
+        {plane ? `${plane} · ` : ""}
+        {aircraft.fuelLph > 0 ? `${aircraft.fuelLph} L/h · ` : ""}
         TAS {flight.tasKt} kt · Wind {roundDeg(flight.windDirDeg)}° / {flight.windSpeedKt} kt ·
         DM {flight.dmDeg}°{flight.dmSense}
       </p>
@@ -41,6 +59,7 @@ export function Report({ flight, rows, airports }: Props) {
             <th>KM</th>
             <th>NM</th>
             <th>Time</th>
+            <th>Fuel</th>
           </tr>
         </thead>
         <tbody>
@@ -60,6 +79,14 @@ export function Report({ flight, rows, airports }: Props) {
               <td className="num">
                 {formatHours(legTimeHours(leg.distanceNm, flight.tasKt))}
               </td>
+              <td className="num">
+                {formatLiters(
+                  estimatedFuelL(
+                    legTimeHours(leg.distanceNm, flight.tasKt),
+                    aircraft.fuelLph,
+                  ),
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -68,6 +95,7 @@ export function Report({ flight, rows, airports }: Props) {
             <td colSpan={4}>Total</td>
             <td className="num">{totalNm} NM</td>
             <td className="num">{formatHours(totalHours)}</td>
+            <td className="num">{formatLiters(totalFuel)}</td>
           </tr>
         </tfoot>
       </table>
@@ -97,8 +125,9 @@ export function Report({ flight, rows, airports }: Props) {
       )}
 
       <p className="disclaimer">
-        Time is distance ÷ TAS. Heading uses the drift-angle model. Verify results
-        against your navigation syllabus.
+        Fuel is planned time × the L/h you entered. It is cruise only: no taxi,
+        climb, contingency, or reserve. Check usable fuel and minima yourself.
+        Time is distance ÷ TAS. Heading uses the drift-angle model.
       </p>
     </section>
   );

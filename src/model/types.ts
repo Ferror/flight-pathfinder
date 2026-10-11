@@ -8,6 +8,12 @@ export type FlightInputs = {
   dmSense: VariationSense;
 };
 
+export type Aircraft = {
+  typeName: string;
+  registration: string;
+  fuelLph: number;
+};
+
 export type LegInput = {
   id: string;
   from: string;

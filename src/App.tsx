@@ -1,17 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
+import { AircraftDetails } from "./components/AircraftDetails";
 import { AirportNotes } from "./components/AirportNotes";
 import { FlightConditions } from "./components/FlightConditions";
 import { LegsTable } from "./components/LegsTable";
 import { Report } from "./components/Report";
 import { RouteMap } from "./components/RouteMap";
 import {
+  defaultAircraft,
   defaultFlight,
   exampleAirports,
   exampleLegs,
   newAirport,
   newLeg,
 } from "./model/defaults";
-import type { AirportNote, FlightInputs, LegInput } from "./model/types";
+import type { Aircraft, AirportNote, FlightInputs, LegInput } from "./model/types";
 import { chainLegs, normalizeLeg } from "./model/route";
 import { calculateCourse } from "./nav/calculateCourse";
 import { applyTheme, loadState, saveState, type Theme } from "./storage/local";
@@ -22,6 +24,7 @@ function initialState() {
       flight: defaultFlight,
       legs: exampleLegs(),
       airports: exampleAirports(),
+      aircraft: defaultAircraft,
       theme: "light" as Theme,
     }
   );
@@ -35,6 +38,9 @@ export function App() {
   const [airports, setAirports] = useState<AirportNote[]>(
     () => initialState().airports,
   );
+  const [aircraft, setAircraft] = useState<Aircraft>(
+    () => initialState().aircraft ?? defaultAircraft,
+  );
   const [theme, setTheme] = useState<Theme>(
     () => {
       const next = initialState().theme ?? "light";
@@ -44,8 +50,8 @@ export function App() {
   );
 
   useEffect(() => {
-    saveState({ flight, legs, airports, theme });
-  }, [flight, legs, airports, theme]);
+    saveState({ flight, legs, airports, aircraft, theme });
+  }, [flight, legs, airports, aircraft, theme]);
 
   useEffect(() => {
     applyTheme(theme);
@@ -65,6 +71,7 @@ export function App() {
     setFlight(defaultFlight);
     setLegs(chainLegs(exampleLegs()));
     setAirports(exampleAirports());
+    setAircraft(defaultAircraft);
   }
 
   return (
@@ -98,6 +105,7 @@ export function App() {
       </header>
 
       <FlightConditions value={flight} onChange={setFlight} />
+      <AircraftDetails value={aircraft} onChange={setAircraft} />
       <LegsTable
         legs={legs}
         flight={flight}
@@ -114,7 +122,12 @@ export function App() {
           Add airport
         </button>
       </div>
-      <Report flight={flight} rows={rows} airports={airports} />
+      <Report
+        flight={flight}
+        aircraft={aircraft}
+        rows={rows}
+        airports={airports}
+      />
       <RouteMap flight={flight} rows={rows} />
     </div>
   );
