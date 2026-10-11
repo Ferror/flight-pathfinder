@@ -12,7 +12,9 @@ export function FlightConditions({ value, onChange }: Props) {
 
   return (
     <section className="card">
-      <h2>Flight conditions</h2>
+      <div className="card-head">
+        <h2>Flight conditions</h2>
+      </div>
       <div className="grid-conditions">
         <label>
           TAS (kt)

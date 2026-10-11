@@ -134,10 +134,6 @@ label {
 
 input[type="number"],
 input[type="text"],
-table input[type="number"] {
-  min-width: 4.25rem;
-}
-
 table input {
   font: inherit;
   font-variant-numeric: tabular-nums;
@@ -147,6 +143,10 @@ table input {
   border-radius: 8px;
   padding: 0.45rem 0.55rem;
   width: 100%;
+}
+
+table input[type="number"] {
+  min-width: 4.25rem;
 }
 
 input:read-only {
@@ -159,8 +159,11 @@ fieldset.sense {
   border: 1px solid var(--line);
   border-radius: 8px;
   margin: 0;
-  padding: 0.35rem 0.6rem 0.5rem;
+  padding: 0.45rem 0.55rem;
+  min-height: 2.4rem;
+  background: var(--input);
   display: flex;
+  align-items: center;
   gap: 0.75rem;
 }
 
