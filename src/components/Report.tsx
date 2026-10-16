@@ -5,7 +5,6 @@ import type {
   FlightInputs,
   LegInput,
 } from "../model/types";
-import type { SynopObservation } from "../weather/imgw";
 import { roundDeg } from "../nav/calculateCourse";
 import {
   estimatedFuelL,
@@ -24,10 +23,9 @@ type Props = {
   aircraft: Aircraft;
   rows: Row[];
   airports: AirportNote[];
-  weather: SynopObservation[];
 };
 
-export function Report({ flight, aircraft, rows, airports, weather }: Props) {
+export function Report({ flight, aircraft, rows, airports }: Props) {
   const totalNm = rows.reduce((sum, { leg }) => sum + (leg.distanceNm || 0), 0);
   const totalHours = legTimeHours(totalNm, flight.tasKt);
   const totalFuel = estimatedFuelL(totalHours, aircraft.fuelLph);
@@ -101,44 +99,6 @@ export function Report({ flight, aircraft, rows, airports, weather }: Props) {
           </tr>
         </tfoot>
       </table>
-
-      {weather.length > 0 && (
-        <>
-          <h3>IMGW synop</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Station</th>
-                <th>Time</th>
-                <th>Wind</th>
-                <th>Temp</th>
-                <th>QNH</th>
-              </tr>
-            </thead>
-            <tbody>
-              {weather.map((obs) => (
-                <tr key={obs.stationId}>
-                  <td>{obs.stationName}</td>
-                  <td>
-                    {obs.date}
-                    {obs.hour ? ` · ${obs.hour}:00` : ""}
-                  </td>
-                  <td className="num">
-                    {obs.windDirDeg !== null ? `${obs.windDirDeg}°` : "—"}
-                    {obs.windKt !== null ? ` / ${obs.windKt} kt` : ""}
-                  </td>
-                  <td className="num">
-                    {obs.temperatureC !== null ? `${obs.temperatureC} °C` : "—"}
-                  </td>
-                  <td className="num">
-                    {obs.pressureHpa !== null ? `${obs.pressureHpa}` : "—"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
-      )}
 
       {shownAirports.length > 0 && (
         <>

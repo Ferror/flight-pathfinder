@@ -13,10 +13,9 @@ type Row = {
 
 type Props = {
   onApplyWind: (wind: { dirDeg: number; speedKt: number }) => void;
-  onObservations: (rows: SynopObservation[]) => void;
 };
 
-export function Weather({ onApplyWind, onObservations }: Props) {
+export function Weather({ onApplyWind }: Props) {
   const [rows, setRows] = useState<Row[]>([]);
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">(
     "idle",
@@ -26,9 +25,6 @@ export function Weather({ onApplyWind, onObservations }: Props) {
     setStatus("loading");
     const next = await fetchSelectedSynops();
     setRows(next);
-    onObservations(
-      next.flatMap((row) => (row.observation ? [row.observation] : [])),
-    );
     setStatus(next.some((row) => row.observation) ? "ok" : "error");
   }
 
