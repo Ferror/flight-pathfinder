@@ -1,4 +1,10 @@
-import type { Aircraft, AirportNote, FlightInputs, LegInput } from "./types";
+import type {
+  Aircraft,
+  AirportNote,
+  ComNote,
+  FlightInputs,
+  LegInput,
+} from "./types";
 
 export const defaultFlight: FlightInputs = {
   tasKt: 80,
@@ -31,8 +37,9 @@ export function newAirport(
   icao = "",
   radio = "",
   runways = "",
+  name = "",
 ): AirportNote {
-  return { id: newId(), icao, radio, runways };
+  return { id: newId(), icao, name, radio, runways };
 }
 
 export function exampleLegs(): LegInput[] {
@@ -44,5 +51,20 @@ export function exampleLegs(): LegInput[] {
 }
 
 export function exampleAirports(): AirportNote[] {
-  return [newAirport("EPGL", "122.225", "26L")];
+  return [];
+}
+
+export function newCom(
+  unit = "",
+  radio = "",
+  note = "",
+): ComNote {
+  return { id: newId(), unit, radio, note };
+}
+
+export function exampleCom(): ComNote[] {
+  return [
+    newCom("FIS Kraków", "119.275 MHz", "sektor zachód"),
+    newCom("FIS Kraków", "119.950 MHz", "sektor wschód"),
+  ];
 }

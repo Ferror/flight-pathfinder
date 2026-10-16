@@ -213,6 +213,25 @@ td.num {
   white-space: nowrap;
 }
 
+td.airport-name {
+  font-size: 0.82rem;
+  color: var(--muted);
+  max-width: 16rem;
+}
+
+.aip-link {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.aip-link:hover {
+  text-decoration: underline;
+}
+
 td.error {
   color: var(--danger);
   background: var(--error-bg);

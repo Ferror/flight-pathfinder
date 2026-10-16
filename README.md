@@ -61,11 +61,13 @@ A total row sums **nautical miles** and **time** for the whole route.
 
 ### Keep airfield notes
 
-A separate table for airports, radios, and runways, for example:
+A separate table for airports, radios, and runways. EP codes on the route
+create a row. You type radio and runways. Each code links to
+[AIP:Aero](https://aip.aero/pl/vfr/?EPGL) so you can look them up quickly.
+Confirm against the official AIP.
 
-> EPGL · 122.225 · 26L
-
-Free text — no database, no ICAO lookup. Write what you need for the briefing.
+FIS / INFO is a second table for en-route units, starting with FIS Kraków
+(119.275 MHz west, 119.950 MHz east). Confirm against the AIP.
 
 ### Print a report
 
@@ -74,7 +76,7 @@ The report is meant to leave the computer:
 - Conditions (TAS, wind, variation)
 - Legs: From, To, KG, KM, NM, time — plus totals  
   (KDM and KZ stay in the working table; they are omitted from the printout)
-- Airports as a proper table
+- Airports as a proper table, plus FIS / INFO
 
 ### Sketch the track
 

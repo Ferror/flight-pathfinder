@@ -1,6 +1,7 @@
 import type {
   Aircraft,
   AirportNote,
+  ComNote,
   CourseResult,
   FlightInputs,
   LegInput,
@@ -23,13 +24,15 @@ type Props = {
   aircraft: Aircraft;
   rows: Row[];
   airports: AirportNote[];
+  com: ComNote[];
 };
 
-export function Report({ flight, aircraft, rows, airports }: Props) {
+export function Report({ flight, aircraft, rows, airports, com }: Props) {
   const totalNm = rows.reduce((sum, { leg }) => sum + (leg.distanceNm || 0), 0);
   const totalHours = legTimeHours(totalNm, flight.tasKt);
   const totalFuel = estimatedFuelL(totalHours, aircraft.fuelLph);
   const shownAirports = airports.filter((a) => a.icao || a.radio || a.runways);
+  const shownCom = com.filter((c) => c.unit || c.radio || c.note);
   const plane = [aircraft.typeName, aircraft.registration]
     .filter(Boolean)
     .join(" · ");
@@ -100,6 +103,30 @@ export function Report({ flight, aircraft, rows, airports }: Props) {
         </tfoot>
       </table>
 
+      {shownCom.length > 0 && (
+        <>
+          <h3>FIS / INFO</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Unit</th>
+                <th>Radio</th>
+                <th>Sector</th>
+              </tr>
+            </thead>
+            <tbody>
+              {shownCom.map((c) => (
+                <tr key={c.id}>
+                  <td>{c.unit || "—"}</td>
+                  <td>{c.radio || "—"}</td>
+                  <td>{c.note || "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
+
       {shownAirports.length > 0 && (
         <>
           <h3>Airports</h3>
@@ -115,8 +142,8 @@ export function Report({ flight, aircraft, rows, airports }: Props) {
               {shownAirports.map((a) => (
                 <tr key={a.id}>
                   <td>{a.icao || "—"}</td>
-                  <td>{a.radio || "—"}</td>
-                  <td>{a.runways || "—"}</td>
+                  <td>{a.radio.trim() || "—"}</td>
+                  <td>{a.runways.trim() || "—"}</td>
                 </tr>
               ))}
             </tbody>

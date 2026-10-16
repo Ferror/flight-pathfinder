@@ -1,3 +1,4 @@
+import { aipAeroUrl } from "../airports/catalog";
 import type { AirportNote } from "../model/types";
 
 type Props = {
@@ -19,6 +20,14 @@ export function AirportNotes({ notes, onChange }: Props) {
       <div className="card-head">
         <h2>Airports, radios, runways</h2>
       </div>
+      <p className="summary">
+        Four-letter EP codes on the route create a row. Copy radio and runways
+        from the AIP yourself — the code links to{" "}
+        <a href="https://aip.aero/pl/vfr/?EPGL" target="_blank" rel="noreferrer">
+          AIP:Aero
+        </a>{" "}
+        for a quicker lookup.
+      </p>
       <div className="table-wrap">
         <table>
           <thead>
@@ -32,10 +41,12 @@ export function AirportNotes({ notes, onChange }: Props) {
           <tbody>
             {notes.length === 0 && (
               <tr className="empty">
-                <td colSpan={4}>Example: EPGL, 122.225, 26L</td>
+                <td colSpan={4}>Add EPGL on the route to create a row.</td>
               </tr>
             )}
-            {notes.map((note) => (
+            {notes.map((note) => {
+              const aip = aipAeroUrl(note.icao);
+              return (
               <tr key={note.id}>
                 <td>
                   <input
@@ -43,18 +54,28 @@ export function AirportNotes({ notes, onChange }: Props) {
                     placeholder="EPGL"
                     onChange={(e) => update(note.id, { icao: e.target.value })}
                   />
+                  {aip && (
+                    <a
+                      className="aip-link no-print"
+                      href={aip}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      AIP:Aero
+                    </a>
+                  )}
                 </td>
                 <td>
                   <input
                     value={note.radio}
-                    placeholder="122.225"
+                    placeholder="118.260"
                     onChange={(e) => update(note.id, { radio: e.target.value })}
                   />
                 </td>
                 <td>
                   <input
                     value={note.runways}
-                    placeholder="26L"
+                    placeholder="08L/26R"
                     onChange={(e) =>
                       update(note.id, { runways: e.target.value })
                     }
@@ -70,7 +91,8 @@ export function AirportNotes({ notes, onChange }: Props) {
                   </button>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

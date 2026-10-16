@@ -25,8 +25,16 @@ export type LegInput = {
 export type AirportNote = {
   id: string;
   icao: string;
+  name?: string;
   radio: string;
   runways: string;
+};
+
+export type ComNote = {
+  id: string;
+  unit: string;
+  radio: string;
+  note: string;
 };
 
 export type LegResult = {

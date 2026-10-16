@@ -1,4 +1,10 @@
-import type { Aircraft, AirportNote, FlightInputs, LegInput } from "../model/types";
+import type {
+  Aircraft,
+  AirportNote,
+  ComNote,
+  FlightInputs,
+  LegInput,
+} from "../model/types";
 
 const KEY = "flight-pathfinder:v1";
 
@@ -8,6 +14,7 @@ export type StoredState = {
   flight: FlightInputs;
   legs: LegInput[];
   airports: AirportNote[];
+  com?: ComNote[];
   aircraft?: Aircraft;
   theme?: Theme;
 };
