@@ -78,6 +78,7 @@ export function RouteMap({ flight, rows }: Props) {
         <svg
           className="map-svg"
           viewBox={`0 0 ${VB.w} ${VB.h}`}
+          preserveAspectRatio="xMidYMid meet"
           role="img"
           aria-label="Schematic route map"
         >

@@ -132,13 +132,15 @@ export function App() {
           Add airport
         </button>
       </div>
-      <Report
-        flight={flight}
-        aircraft={aircraft}
-        rows={rows}
-        airports={airports}
-      />
-      <RouteMap flight={flight} rows={rows} />
+      <div className="print-sheet">
+        <Report
+          flight={flight}
+          aircraft={aircraft}
+          rows={rows}
+          airports={airports}
+        />
+        <RouteMap flight={flight} rows={rows} />
+      </div>
     </div>
   );
 }
