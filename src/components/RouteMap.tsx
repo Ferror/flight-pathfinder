@@ -123,24 +123,29 @@ export function RouteMap({ flight, rows }: Props) {
             <Segment key={seg.id} seg={seg} px={px} scale={scale} />
           ))}
 
-          {points.map((p, i) => {
-            const c = px(p.x, p.y);
-            const right = c.x > VB.w - 100;
-            const top = c.y < 70;
-            return (
-              <g key={`${p.name}-${i}`}>
-                <circle cx={c.x} cy={c.y} r={i === 0 ? 6 : 4.5} className="map-fix" />
+          {placePointLabels(
+            points.map((p, i) => ({ ...px(p.x, p.y), name: p.name, i })),
+            segments.map((seg) => {
+              const a = px(seg.from.x, seg.from.y);
+              const b = px(seg.to.x, seg.to.y);
+              return { x1: a.x, y1: a.y, x2: b.x, y2: b.y };
+            }),
+          ).map((p) => (
+            <g key={`${p.name}-${p.i}`}>
+              <circle cx={p.x} cy={p.y} r={p.i === 0 ? 6 : 4.5} className="map-fix" />
+              {p.showName && (
                 <text
-                  x={c.x + (right ? -10 : 10)}
-                  y={c.y + (top ? 18 : -10)}
-                  textAnchor={right ? "end" : "start"}
+                  x={p.labelX}
+                  y={p.labelY}
+                  textAnchor={p.anchor}
+                  dominantBaseline={p.baseline}
                   className="map-label"
                 >
                   {p.name}
                 </text>
-              </g>
-            );
-          })}
+              )}
+            </g>
+          ))}
 
           <g transform={`translate(${windOrigin.x} ${windOrigin.y})`}>
             <line
@@ -194,8 +199,16 @@ function Segment({
   const b = px(seg.to.x, seg.to.y);
   const mx = (a.x + b.x) / 2;
   const my = (a.y + b.y) / 2;
-  const angle = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
-  const flip = angle > 90 || angle < -90;
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const len = Math.hypot(dx, dy) || 1;
+  let nx = -dy / len;
+  let ny = dx / len;
+  if (ny > 0) {
+    nx = -nx;
+    ny = -ny;
+  }
+  const label = { x: mx + nx * 14, y: my + ny * 14 };
   const headingLen = Math.max(18, Math.min(seg.distanceNm * scale * 0.45, 48));
   const headingNm = headingLen / Math.max(scale, 1e-6);
   const headingEnd =
@@ -228,14 +241,13 @@ function Segment({
         />
       )}
       <text
-        x={mx}
-        y={my}
+        x={label.x}
+        y={label.y}
         className="map-leg-text"
-        transform={`rotate(${flip ? angle + 180 : angle} ${mx} ${my})`}
-        dy={flip ? 14 : -8}
+        dominantBaseline="middle"
         textAnchor="middle"
       >
-        KG {roundDeg(seg.kgDeg)}° · KM {km} · {seg.distanceNm} NM · {seg.timeLabel}
+        KG {roundDeg(seg.kgDeg)}° · KM {km} · {seg.timeLabel}
       </text>
     </g>
   );
@@ -251,6 +263,105 @@ function Compass({ x, y }: { x: number; y: number }) {
       </text>
     </g>
   );
+}
+
+type ScreenPoint = { x: number; y: number; name: string; i: number };
+type Track = { x1: number; y1: number; x2: number; y2: number };
+type Anchor = "start" | "middle" | "end";
+type Baseline = "alphabetic" | "hanging" | "middle";
+
+const LABEL_SLOTS: {
+  dx: number;
+  dy: number;
+  anchor: Anchor;
+  baseline: Baseline;
+}[] = [
+  { dx: 14, dy: -14, anchor: "start", baseline: "alphabetic" },
+  { dx: -14, dy: -14, anchor: "end", baseline: "alphabetic" },
+  { dx: 0, dy: -18, anchor: "middle", baseline: "alphabetic" },
+  { dx: 16, dy: 2, anchor: "start", baseline: "middle" },
+  { dx: -16, dy: 2, anchor: "end", baseline: "middle" },
+  { dx: 0, dy: 18, anchor: "middle", baseline: "hanging" },
+  { dx: 16, dy: 16, anchor: "start", baseline: "hanging" },
+  { dx: -16, dy: 16, anchor: "end", baseline: "hanging" },
+];
+
+function placePointLabels(points: ScreenPoint[], tracks: Track[]) {
+  const seenName = new Set<string>();
+  return points.map((p) => {
+    const pos = `${Math.round(p.x)}:${Math.round(p.y)}`;
+    const nameKey = `${pos}:${p.name}`;
+    const duplicate = seenName.has(nameKey);
+    seenName.add(nameKey);
+    const slot = clearLabelSlot(p, tracks);
+    return {
+      ...p,
+      showName: !duplicate,
+      anchor: slot.anchor,
+      baseline: slot.baseline,
+      labelX: p.x + slot.dx,
+      labelY: p.y + slot.dy,
+    };
+  });
+}
+
+function clearLabelSlot(point: ScreenPoint, tracks: Track[]) {
+  const width = Math.max(point.name.length * 7.2, 24);
+  let best = LABEL_SLOTS[0];
+  let bestScore = -Infinity;
+  for (const slot of LABEL_SLOTS) {
+    const samples = labelSamples(
+      point.x + slot.dx,
+      point.y + slot.dy,
+      width,
+      slot.anchor,
+      slot.baseline,
+    );
+    let clearance = Infinity;
+    for (const [sx, sy] of samples) {
+      if (sx < 8 || sy < 8 || sx > VB.w - 8 || sy > VB.h - 8) {
+        clearance = Math.min(clearance, -20);
+        continue;
+      }
+      for (const track of tracks) {
+        clearance = Math.min(clearance, distToSegment(sx, sy, track));
+      }
+    }
+    const score =
+      Math.min(clearance, 12) + (slot.dy < 0 ? 4 : 0) + (slot.dx > 0 ? 2 : 0);
+    if (score > bestScore) {
+      bestScore = score;
+      best = slot;
+    }
+  }
+  return best;
+}
+
+function labelSamples(
+  x: number,
+  y: number,
+  width: number,
+  anchor: Anchor,
+  baseline: Baseline,
+): [number, number][] {
+  const left =
+    anchor === "end" ? x - width : anchor === "middle" ? x - width / 2 : x;
+  const top = baseline === "hanging" ? y : baseline === "middle" ? y - 6 : y - 12;
+  const bottom = baseline === "alphabetic" ? y : baseline === "middle" ? y + 6 : y + 12;
+  const samples: [number, number][] = [];
+  for (let i = 0; i <= 4; i++) {
+    const sx = left + (width * i) / 4;
+    samples.push([sx, top], [sx, bottom]);
+  }
+  return samples;
+}
+
+function distToSegment(px: number, py: number, track: Track): number {
+  const dx = track.x2 - track.x1;
+  const dy = track.y2 - track.y1;
+  const len2 = dx * dx + dy * dy || 1;
+  const t = Math.max(0, Math.min(1, ((px - track.x1) * dx + (py - track.y1) * dy) / len2));
+  return Math.hypot(px - (track.x1 + t * dx), py - (track.y1 + t * dy));
 }
 
 function niceStep(raw: number): number {
